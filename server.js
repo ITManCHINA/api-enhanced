@@ -178,10 +178,25 @@ async function consturctServer(moduleDefs) {
   /**
    * Body Parser and File Upload
    */
-  app.use(express.json({ limit: '50mb' }))
-  app.use(express.urlencoded({ extended: false, limit: '50mb' }))
+  const MAX_UPLOAD_SIZE_MB = 500
+  const MAX_UPLOAD_SIZE_BYTES = MAX_UPLOAD_SIZE_MB * 1024 * 1024
 
-  app.use(fileUpload())
+  app.use(express.json({ limit: `${MAX_UPLOAD_SIZE_MB}mb` }))
+  app.use(
+    express.urlencoded({ extended: false, limit: `${MAX_UPLOAD_SIZE_MB}mb` }),
+  )
+
+  app.use(
+    fileUpload({
+      limits: {
+        fileSize: MAX_UPLOAD_SIZE_BYTES,
+      },
+      useTempFiles: true,
+      tempFileDir: require('os').tmpdir(),
+      abortOnLimit: true,
+      parseNested: true,
+    }),
+  )
 
   /**
    * Cache
@@ -227,19 +242,23 @@ async function consturctServer(moduleDefs) {
         const moduleResponse = await moduleDef.module(query, (...params) => {
           // 参数注入客户端IP
           const obj = [...params]
-          let ip = req.ip
+          const options = obj[2] || {}
+          if (!options.randomCNIP) {
+            let ip = req.ip
 
-          if (ip.substring(0, 7) == '::ffff:') {
-            ip = ip.substring(7)
+            if (ip.substring(0, 7) == '::ffff:') {
+              ip = ip.substring(7)
+            }
+            if (ip == '::1') {
+              ip = global.cnIp
+            }
+            // logger.info('Requested from ip:', ip)
+            obj[2] = {
+              ...options,
+              ip,
+            }
           }
-          if (ip == '::1') {
-            ip = global.cnIp
-          }
-          logger.info('Requested from ip:', ip)
-          obj[3] = {
-            ...obj[3],
-            ip,
-          }
+
           return request(...obj)
         })
         logger.info(`Request Success: ${decode(req.originalUrl)}`)
