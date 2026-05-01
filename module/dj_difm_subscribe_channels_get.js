@@ -1,13 +1,13 @@
-// 每日推荐歌曲
+// DIFM电台 - 收藏列表
 
 const createOption = require('../util/option.js')
 module.exports = (query, request) => {
   const data = {
-    afresh: query.afresh,
+    sources: query.sources || '[0]',
   }
   return request(
-    `/api/v3/discovery/recommend/songs`,
+    `/api/dj/difm/subscribe/channels/get/v2`,
     data,
-    createOption(query, 'weapi'),
+    createOption(query),
   )
 }

@@ -209,6 +209,12 @@ $ sudo docker build . -t netease-music-api
 $ sudo docker run -d -p 3000:3000 netease-music-api
 ```
 
+## 调试工具
+
+- `eapi` 请求参数或返回内容可在 `/eapi_decrypt.html` 里解析
+- 请求参数模式下, 解密结果可直接带到 `/api.html` 继续调试
+- 需要返回值加密时, 可传 `e_r=1`, `weapi` 和 `eapi` 都支持
+
 ## 接口文档
 
 ### 调用前须知
@@ -2323,6 +2329,8 @@ privilege:权限相关信息
 ### 获取每日推荐歌曲
 
 说明 : 调用此接口 , 可获得每日推荐歌曲 ( 需要登录 )
+
+**可选参数 :** `afresh`: 是否刷新日推 , 默认为 false
 
 **接口地址 :** `/recommend/songs`
 
@@ -5031,6 +5039,21 @@ let data = encodeURIComponent(
 
 **调用例子:** `/vip/sign/info`
 
+### 广播电台 - 收藏/取消收藏电台
+
+说明: 登录后调用此接口, 传入电台 id, 可收藏或取消收藏广播电台
+
+**必选参数：**
+
+`id`: 电台 id
+
+`t`: 操作类型, `1` 为收藏, 其余值为取消收藏
+
+**接口地址:** `/broadcast/sub`
+
+**调用例子:** `/broadcast/sub?id=5&t=1`
+
+
 ### 用户的创建歌单列表
 
 说明 : 调用此接口, 传入用户id, 获取用户的创建歌单列表
@@ -5142,6 +5165,170 @@ let data = encodeURIComponent(
 **接口地址 :** `/comment/reply`
 
 **调用例子 :** `/comment/reply?id=2058263032&commentId=123456789&content=我也觉得这首歌很棒！`
+
+### DIFM电台 - 分类
+
+说明: 调用此接口, 获取DIFM电台分类
+
+**必选参数 :**  
+
+`sources`: 来源列表, 0: 最嗨电音 1: 古典电台 2: 爵士电台
+
+**接口地址:** `/dj/difm/all/style/channel`
+
+**调用例子:** `/dj/difm/all/style/channel?sources=[0]`
+
+### DIFM电台 - 收藏列表
+
+说明: 调用此接口, 获取DIFM电台收藏列表
+
+**必选参数 :**  
+
+`sources`: 来源列表, 0: 最嗨电音 1: 古典电台 2: 爵士电台
+
+**接口地址:** `/dj/difm/subscribe/channels/get`
+
+**调用例子:** `/dj/difm/subscribe/channels/get?sources=[0]`
+
+### DIFM电台 - 收藏频道
+
+说明: 调用此接口, 可收藏DIFM频道
+
+**必选参数 :**
+
+`id`: 频道id
+
+**接口地址:** `/dj/difm/channel/subscribe`
+
+**调用例子:** `/dj/difm/channel/subscribe?id=1`
+
+### DIFM电台 - 取消收藏频道
+
+说明: 调用此接口, 可取消收藏DIFM频道
+
+**必选参数 :**
+
+`id`: 频道id
+
+**接口地址:** `/dj/difm/channel/unsubscribe`
+
+**调用例子:** `/dj/difm/channel/unsubscribe?id=1`
+
+### DIFM电台 - 播放列表
+
+说明: 调用此接口, 获取DIFM播放列表
+
+**必选参数 :**  
+
+`source`: 来源, 0: 最嗨电音 1: 古典电台 2: 爵士电台
+
+`channelId`: 频道id
+
+**可选参数 :**
+
+`limit`: 返回数量, 默认为 5
+
+**接口地址:** `/dj/difm/playing/tracks/list`
+
+**调用例子:** `/dj/difm/playing/tracks/list?source=0&channelId=1012`
+
+### 助眠解压 - 特定时间场景下的推荐资源
+
+说明: 调用此接口, 获取特定时间场景下的推荐资源
+
+**接口地址:** `/sati/timescene/resources/get`
+
+**调用例子:** `/sati/timescene/resources/get`
+
+### 助眠解压 - 标签列表
+
+说明: 调用此接口, 获取标签列表
+
+**接口地址:** `/sati/tag/list`
+
+**调用例子:** `/sati/tag/list`
+
+### 助眠解压 - 获取标签下资源列表
+
+说明: 调用此接口, 获取标签下资源列表; 接口返回的`trackId`可以用于请求`/song/url/v1`接口，用于获取声音的下载地址
+
+**必选参数 :**  
+
+`tag`: 标签, 由标签列表接口得到
+
+**接口地址:** `/sati/resource/list`
+
+**调用例子:** `/sati/resource/list?tag=naturalMusic`
+
+### 助眠解压 - 查看同类推荐
+
+说明: 调用此接口, 查看同类推荐
+
+**必选参数 :**  
+
+`id`: id, `/sati/tag/list`接口返回的`trackId`
+
+**接口地址:** `/sati/resource/list/more`
+
+**调用例子:** `/sati/resource/list/more?id=167003`
+
+### 助眠解压 - 收藏列表
+
+说明: 调用此接口, 获取收藏列表
+
+**接口地址:** `/sati/resource/sub/list`
+
+**调用例子:** `/sati/resource/sub/list`
+
+### 助眠解压 - 收藏
+
+说明: 调用此接口, 收藏声音
+
+**必选参数 :**  
+
+`id`: id, `/sati/tag/list`接口返回的`trackId`
+
+**可选参数 :**
+
+`cancel`: 是否取消收藏, 默认不取消
+
+**接口地址:** `/sati/resource/sub`
+
+**调用例子:** `/sati/resource/sub?id=167003`
+
+### 跑步漫游
+
+说明: 调用此接口，获取跑步漫游的歌曲信息
+
+**必选参数：**     
+
+`bpm`: 步频
+
+**接口地址:** `/radio/sport/get`
+
+**调用例子:** `/radio/sport/get?bpm=50`
+
+### 歌曲创作者信息
+
+说明 : 调用此接口, 传入音乐 id 可获得对应音乐的创作者信息
+
+**必选参数 :** `id`: 音乐 id
+
+**接口地址 :** `/song/creators`
+
+**调用例子 :** `/song/creators?id=33894312`
+
+### 灰色歌曲的其他版本推荐
+
+说明 : 调用此接口, 传入灰色歌曲 id, 获取该歌曲的其他可播放版本推荐
+
+**必选参数 :**
+
+`songid`: 歌曲 id, 可使用 `id` 代替
+
+**接口地址 :** `/song/copyright/rcmd`
+
+**调用例子 :** `/song/copyright/rcmd?songid=27946878`
 
 ## 离线访问此文档
 
